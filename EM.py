@@ -27,11 +27,11 @@ for i in range(50):
 	print('Log likelihood:', L)
 	
 	
-def expectation:
+def expectation():
 	weight[m] = weight[m] = alpha[m] * mlab.normpdf(x, mu[m], sigma[m])
 	
 	
-def maximization:
+def maximization():
 	mu = np.sum(weight*x, axis=1)/np.sum(weight, axis=1)	
 	sigma = np.sqrt(np.sum(weight * pow(x - mu[:,np.newaxis],2), axis=1) / np.sum(weight, axis=1))
 	
