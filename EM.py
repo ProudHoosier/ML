@@ -2,41 +2,29 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 
-x = np.loadtxt('data1.txt')
+x = np.loadtxt('input/data1.txt')
 
 # number of mixtures
-m = 3
-n = m-1
+M = 3
 # likelihood of the mixture
-alpha = np.ones(m)*(1/m)
+alpha = np.ones(M)*(1/M)
 # Intitialize means randomly
-mu = np.random.random(m)*50 
+mu = np.random.random(M)*20 
 # Intitialize sd randomly
-sigma = np.ones(m)*100.0 
+sigma = np.ones(M)*100.0 
 
-weight = np.zeros((m, len(x)))
+weight = np.zeros((M, len(x)))
 
-def expectation():
-	weight[n] = weight[n] = alpha[n] * mlab.normpdf(x, mu[n], sigma[n])
+for i in range(100): 
+	
+	L = 0
+	for j in range(M):
+		weight[j] = alpha[j] * mlab.normpdf(x, mu[j], sigma[j])
 
-def maximization():
+	# calculate new class priors
+	alpha = np.sum(weight, axis=1)/len(x)
 	mu = np.sum(weight*x, axis=1)/np.sum(weight, axis=1)
 	sigma = np.sqrt(np.sum(weight * pow(x - mu[:,np.newaxis],2), axis=1) / np.sum(weight, axis=1))
 
-	#calculate new class priors
-	alpha = np.sum(weight, axis=1)/len(x)
-
-for i in range(50):
-	print('alpha:', alpha, 'mu:', mu, 'sigma', sigma)
-	L = 0
-	for j in range(m):
-		expectation()
-	maximization()
-    
-	for k in range(len(x)):
-		L += np.log(np.sum(weight, axis=1))
-	print('Log likelihood:', L)
-
-
-
-
+	# Log likelihood
+	#ToDo
