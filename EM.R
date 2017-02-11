@@ -1,43 +1,52 @@
-data<- scan("C:/Users/prathameshj/Desktop/ML/data1.txt")
-clusters<- c(4)
-x<-list()
-x<-Expectation_Maximization(data, 200,clusters)
+data <- scan("/home/ds/Downloads/project/data1.txt")
+mixtures <- c(3)
+x <- list()
+iterations <- 250
+x <- EM(data, mixtures, iterations)
 x
 
-Expectation_Maximization<- function(data, iterations, clusters){
-      cluster_probability<-rep(1/clusters,clusters)
-      cluster_mean<-runif(clusters, min = 0, max=1)
-      cluster_sd<- runif(clusters, min=0, max=1)
-      iter=1
-      cols<- list()
-      L<-list()
-      L2<-vector()
+#Covergence condition
+delta <- 10^(-5)
+
+EM <- function(data, mixtures, iterations){
       
-      while( iter < iterations){
-        #Expectation Step
-          for(i in 1:clusters){
-            cols[[i]]<- c(cluster_probability[i]*dnorm(data, cluster_mean[i],cluster_sd[i]))
+      prior <- rep(1/mixtures, mixtures)
+      mu <- runif(mixtures, min = 0, max=1)
+      sd <- runif(mixtures, min = 0, max=1)
+      
+      counter = 1
+      columns <- list()
+      L <- list()
+      L2 <- vector()
+      
+      while(counter < iterations){
+        
+        #Expectation
+          for(i in 1:mixtures){
+            columns[[i]] <- c(prior[i] * dnorm(data, mu[i], sd[i]))
           }
-          output <- matrix(unlist(cols), nrow = clusters, byrow = TRUE)
-          output<-t(t(output)/rowSums(t(output)))
-          N=rowSums(output)
+          output <- matrix(unlist(columns), nrow = mixtures, byrow = TRUE)
+          output <- t(t(output)/rowSums(t(output)))
+          N = rowSums(output)
         
-        
-        #Maximization Step
-        for (i in 1:clusters){
-          cluster_mean[i]<- sum(output[i,]*data)/N[i]
-          cluster_sd[i]<- sqrt(((sum(output[i,]*(data^2)))/N[i]) - ((cluster_mean[i])^2))
+        #Maximization
+        for (i in 1:mixtures){
+          mu[i]<- sum(output[i,]*data)/N[i]
+          sd[i]<- sqrt(((sum(output[i,]*(data^2)))/N[i]) - ((mu[i])^2))
           
         }
-        cluster_probability = N/sum(N)
-        #Log likelihood.
-        for (i in 1:clusters) {
-          L[[i]]<- c(cluster_probability[i]*dnorm(data,cluster_mean[i],cluster_sd[i]))
+        
+        prior = N/sum(N)
+        
+        # Calculate log-likelihood.
+        for (i in 1:mixtures) {
+          L[[i]]<- c(prior[i] * dnorm(data,mu[i], sd[i]))
         }
-        L1<-matrix(unlist(L), nrow = clusters, byrow = TRUE)
-        L2[iter]<-sum(log(colSums(L1)))
-        iter=iter+1
+
+        L1 <- matrix(unlist(L), nrow = mixtures, byrow = TRUE)
+        L2[counter] <- sum(log(colSums(L1)))
+        counter = counter + 1
         
       }
-    return(list("cluster_probability" = c(cluster_probability), "cluster_mean" = c(cluster_mean), "cluster_sd" = c(cluster_sd), "Log likelihood" = c(L2)))
+    return(list("prior" = c(prior), "mu" = c(mu), "sd" = c(sd), "Log likelihood" = c(L2)))
 }
